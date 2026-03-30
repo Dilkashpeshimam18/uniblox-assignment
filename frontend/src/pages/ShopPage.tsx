@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Product, productApi } from '../api/client';
+import { Product, adminApi, productApi } from '../api/client';
 import AdminPanel from '../components/AdminPanel';
 import CartSidebar from '../components/CartSidebar';
 import ProductCard from '../components/ProductCard';
@@ -9,11 +9,19 @@ export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [config, setConfig] = useState<{ nthOrder: number; discountPercent: number } | null>(null);
   const { itemCount } = useCart();
 
   useEffect(() => {
     productApi.list().then(setProducts);
+    adminApi.getConfig().then(setConfig);
   }, []);
+
+  // Re-fetch config when admin panel closes so hero stats update immediately
+  const handleAdminClose = () => {
+    setAdminOpen(false);
+    adminApi.getConfig().then(setConfig);
+  };
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -62,9 +70,9 @@ export default function ShopPage() {
             Discover top-tier accessories built for performance. Every 5th order unlocks an exclusive discount.
           </p>
           <div className="hero-stats">
-            <div className="hero-stat"><strong>6</strong>Products</div>
-            <div className="hero-stat"><strong>10%</strong>Discount reward</div>
-            <div className="hero-stat"><strong>Every 5th</strong>Order wins</div>
+            <div className="hero-stat"><strong>{products.length || 6}</strong>Products</div>
+            <div className="hero-stat"><strong>{config ? `${config.discountPercent}%` : '—'}</strong>Discount reward</div>
+            <div className="hero-stat"><strong>{config ? `Every ${config.nthOrder}th` : '—'}</strong>Order wins</div>
             <div className="hero-stat"><strong>Free</strong>Returns</div>
           </div>
         </div>
@@ -100,7 +108,7 @@ export default function ShopPage() {
       </main>
 
       <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
-      {adminOpen && <AdminPanel onClose={() => setAdminOpen(false)} />}
+      {adminOpen && <AdminPanel onClose={handleAdminClose} />}
     </div>
   );
 }
