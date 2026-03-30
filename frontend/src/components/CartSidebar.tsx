@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import CheckoutModal from './CheckoutModal';
 
@@ -8,99 +8,137 @@ interface Props {
 }
 
 export default function CartSidebar({ open, onClose }: Props) {
-  const { cart, subtotal, updateItem, removeItem, loading } = useCart();
+  const { cart, subtotal, updateItem, removeItem, loading, itemCount } = useCart();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   if (!open) return null;
 
+  const hasItems = cart && cart.items.length > 0;
+
   return (
     <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 40,
-        }}
-      />
+      <div className="cart-overlay" onClick={onClose} />
 
-      {/* Sidebar */}
-      <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: '380px',
-        background: 'var(--card)', zIndex: 50,
-        display: 'flex', flexDirection: 'column',
-        boxShadow: '-4px 0 20px rgba(0,0,0,0.1)',
-      }}>
+      <aside className="cart-sidebar">
         {/* Header */}
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Your Cart</h2>
-          <button className="btn-secondary" onClick={onClose} style={{ padding: '6px 12px' }}>&#x2715;</button>
+        <div className="cart-header">
+          <h2>
+            Your Cart
+            {itemCount > 0 && (
+              <span className="cart-header-count">{itemCount}</span>
+            )}
+          </h2>
+          <button className="btn-ghost modal-close-btn" onClick={onClose} aria-label="Close cart">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
 
         {/* Items */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {!cart || cart.items.length === 0 ? (
-            <p style={{ color: 'var(--muted)', textAlign: 'center', marginTop: '40px' }}>Your cart is empty</p>
-          ) : (
-            cart.items.map(item => (
-              <div key={item.productId} style={{
-                display: 'flex', gap: '12px', padding: '12px',
-                background: 'var(--bg)', borderRadius: '8px',
-                alignItems: 'center',
-              }}>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 600, fontSize: '14px' }}>{item.productName}</p>
-                  <p style={{ color: 'var(--muted)', fontSize: '13px' }}>${item.price.toFixed(2)} each</p>
+        {!hasItems ? (
+          <div className="cart-empty">
+            <div className="cart-empty-icon">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--slate-400)' }}>
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 001.95-1.56l1.54-7.44H6"/>
+              </svg>
+            </div>
+            <p style={{ fontWeight: 600, color: 'var(--slate-700)', fontSize: '15px' }}>Your cart is empty</p>
+            <p style={{ fontSize: '13px', color: 'var(--muted)' }}>Add some products to get started!</p>
+            <button className="btn-primary" onClick={onClose} style={{ marginTop: 8, padding: '9px 20px' }}>
+              Browse Products
+            </button>
+          </div>
+        ) : (
+          <div className="cart-items">
+            {cart.items.map(item => (
+              <div key={item.productId} className="cart-item">
+                {/* Thumbnail */}
+                <div className="cart-item-thumb">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--indigo-500)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <button
-                    className="btn-secondary"
-                    style={{ padding: '4px 10px', fontSize: '16px' }}
-                    onClick={() => updateItem(item.productId, item.quantity - 1)}
-                    disabled={loading}
-                  >&#8722;</button>
-                  <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 600 }}>{item.quantity}</span>
-                  <button
-                    className="btn-secondary"
-                    style={{ padding: '4px 10px', fontSize: '16px' }}
-                    onClick={() => updateItem(item.productId, item.quantity + 1)}
-                    disabled={loading}
-                  >&#43;</button>
+
+                {/* Info */}
+                <div className="cart-item-info">
+                  <p className="cart-item-name">{item.productName}</p>
+                  <p className="cart-item-price">${item.price.toFixed(2)} each</p>
+                  <p className="cart-item-subtotal">${(item.price * item.quantity).toFixed(2)}</p>
                 </div>
-                <button
-                  className="btn-danger"
-                  style={{ padding: '4px 10px', fontSize: '12px' }}
-                  onClick={() => removeItem(item.productId)}
-                  disabled={loading}
-                >Remove</button>
+
+                {/* Controls */}
+                <div className="cart-item-controls">
+                  <div className="qty-controls">
+                    <button
+                      className="qty-btn"
+                      onClick={() => updateItem(item.productId, item.quantity - 1)}
+                      disabled={loading}
+                      aria-label="Decrease"
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                    <span className="qty-value">{item.quantity}</span>
+                    <button
+                      className="qty-btn"
+                      onClick={() => updateItem(item.productId, item.quantity + 1)}
+                      disabled={loading}
+                      aria-label="Increase"
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                  </div>
+                  <button
+                    className="remove-btn"
+                    onClick={() => removeItem(item.productId)}
+                    disabled={loading}
+                    aria-label="Remove item"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6"/>
+                      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Footer */}
-        {cart && cart.items.length > 0 && (
-          <div style={{ padding: '20px', borderTop: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 600, fontSize: '16px' }}>Subtotal</span>
-              <span style={{ fontWeight: 700, fontSize: '18px', color: 'var(--primary)' }}>
-                ${subtotal.toFixed(2)}
-              </span>
+        {hasItems && (
+          <div className="cart-footer">
+            <div className="cart-subtotal-row">
+              <span>{itemCount} item{itemCount !== 1 ? 's' : ''}</span>
+              <span>Subtotal</span>
             </div>
+            <div className="cart-total-row">
+              <span className="cart-total-label">Total</span>
+              <span className="cart-total-value">${subtotal.toFixed(2)}</span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '12px', textAlign: 'center' }}>
+              Taxes and shipping calculated at checkout
+            </p>
             <button
-              className="btn-primary"
-              style={{ width: '100%', padding: '12px' }}
+              className="btn-primary checkout-btn"
               onClick={() => setCheckoutOpen(true)}
             >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
               Proceed to Checkout
             </button>
           </div>
         )}
-      </div>
+      </aside>
 
       {checkoutOpen && (
-        <CheckoutModal
-          onClose={() => { setCheckoutOpen(false); onClose(); }}
-        />
+        <CheckoutModal onClose={() => { setCheckoutOpen(false); onClose(); }} />
       )}
     </>
   );

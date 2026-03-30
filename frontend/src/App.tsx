@@ -1,4 +1,3 @@
-import React from 'react';
 import { CartProvider } from './context/CartContext';
 import ShopPage from './pages/ShopPage';
 

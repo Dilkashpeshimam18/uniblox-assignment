@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { checkoutApi, Order } from '../api/client';
 import { useCart } from '../context/CartContext';
 
@@ -26,108 +26,153 @@ export default function CheckoutModal({ onClose }: Props) {
       await resetCart();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
-      setError(axiosErr.response?.data?.error || 'Checkout failed');
+      setError(axiosErr.response?.data?.error || 'Checkout failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{
-        background: 'var(--card)', borderRadius: '16px', padding: '32px',
-        width: '480px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto',
-      }}>
+    <div className="modal-backdrop">
+      <div className="modal">
         {order ? (
-          // Success state
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>&#9989;</div>
-            <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '8px' }}>Order Placed!</h2>
-            <p style={{ color: 'var(--muted)', marginBottom: '24px' }}>
-              Order #{order.orderNumber} confirmed
-            </p>
+          /* ── Success State ── */
+          <div className="modal-body order-success">
+            <div className="success-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
 
-            <div style={{ background: 'var(--bg)', borderRadius: '8px', padding: '16px', textAlign: 'left', marginBottom: '16px' }}>
+            <h2>Order Placed!</h2>
+            <div className="order-number-badge">Order #{order.orderNumber}</div>
+
+            <div className="order-receipt">
               {order.items.map(item => (
-                <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
-                  <span>{item.productName} &times; {item.quantity}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <div key={item.productId} className="receipt-row">
+                  <span className="cart-item-name">{item.productName} &times; {item.quantity}</span>
+                  <span style={{ fontWeight: 600 }}>${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '8px 0' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                <span>Subtotal</span><span>${order.subtotal.toFixed(2)}</span>
+              <div className="receipt-row" style={{ borderTop: '1px solid var(--border)', background: 'var(--slate-50)' }}>
+                <span style={{ color: 'var(--muted)' }}>Subtotal</span>
+                <span>${order.subtotal.toFixed(2)}</span>
               </div>
               {order.discountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: 'var(--success)' }}>
-                  <span>Discount ({order.discountPercent}%)</span>
-                  <span>&#8722;${order.discountAmount.toFixed(2)}</span>
+                <div className="receipt-row discount">
+                  <span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginRight: 4, verticalAlign: 'middle' }}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Discount ({order.discountCode} &mdash; {order.discountPercent}% off)
+                  </span>
+                  <span style={{ fontWeight: 700 }}>-${order.discountAmount.toFixed(2)}</span>
                 </div>
               )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 700, marginTop: '8px' }}>
-                <span>Total</span><span>${order.total.toFixed(2)}</span>
+              <div className="receipt-row total">
+                <span>Total Paid</span>
+                <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  ${order.total.toFixed(2)}
+                </span>
               </div>
             </div>
 
             {newDiscountEligible && (
-              <div style={{
-                background: '#fef9c3', border: '1px solid #fbbf24',
-                borderRadius: '8px', padding: '12px', marginBottom: '16px', fontSize: '13px',
-              }}>
-                You've unlocked a discount code! Ask an admin to generate it.
+              <div className="discount-unlocked">
+                <span style={{ fontSize: 20 }}>&#127881;</span>
+                <div>
+                  <strong>You unlocked a discount code!</strong><br />
+                  Your order qualified for a reward. Ask an admin to generate it from the Admin Panel.
+                </div>
               </div>
             )}
 
-            <button className="btn-primary" onClick={onClose} style={{ width: '100%' }}>
+            <button className="btn-primary" onClick={onClose} style={{ width: '100%', padding: '13px', justifyContent: 'center', borderRadius: 10 }}>
               Continue Shopping
             </button>
           </div>
         ) : (
-          // Checkout form
+          /* ── Checkout Form ── */
           <>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px' }}>Checkout</h2>
+            <div className="modal-header">
+              <div>
+                <h2 className="modal-title">Checkout</h2>
+                <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: 4 }}>
+                  Review your order and apply a discount
+                </p>
+              </div>
+              <button className="btn-ghost modal-close-btn" onClick={onClose}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
 
-            {/* Order summary */}
-            <div style={{ background: 'var(--bg)', borderRadius: '8px', padding: '12px', marginBottom: '20px' }}>
-              {cart.items.map(item => (
-                <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
-                  <span>{item.productName} &times; {item.quantity}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+            <div className="modal-body">
+              {/* Order summary */}
+              <div className="checkout-summary">
+                <div className="checkout-summary-header">Order Summary</div>
+                {cart.items.map(item => (
+                  <div key={item.productId} className="checkout-item">
+                    <span className="checkout-item-name">{item.productName} &times; {item.quantity}</span>
+                    <span className="checkout-item-price">${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="checkout-total-row">
+                  <span>Subtotal</span>
+                  <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    ${subtotal.toFixed(2)}
+                  </span>
                 </div>
-              ))}
-              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '8px 0' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-                <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
               </div>
+
+              {/* Discount code */}
+              <div className="discount-input-wrap">
+                <label className="discount-label">
+                  Discount Code <span style={{ fontWeight: 400, color: 'var(--muted)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+                </label>
+                <div className="discount-input-row">
+                  <input
+                    type="text"
+                    placeholder="e.g. SAVE10-A3F9B2"
+                    value={discountCode}
+                    onChange={e => setDiscountCode(e.target.value.toUpperCase())}
+                    onKeyDown={e => e.key === 'Enter' && !loading && handleCheckout()}
+                    style={{ flex: 1 }}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="error-banner">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  {error}
+                </div>
+              )}
             </div>
 
-            {/* Discount code */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, marginBottom: '6px' }}>
-                Discount Code (optional)
-              </label>
-              <input
-                type="text"
-                placeholder="Enter discount code"
-                value={discountCode}
-                onChange={e => setDiscountCode(e.target.value.toUpperCase())}
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            {error && (
-              <div style={{ background: '#fee2e2', color: 'var(--danger)', padding: '10px 12px', borderRadius: '6px', marginBottom: '16px', fontSize: '14px' }}>
-                {error}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button className="btn-secondary" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
-              <button className="btn-primary" onClick={handleCheckout} disabled={loading} style={{ flex: 2 }}>
-                {loading ? 'Processing...' : 'Place Order'}
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={onClose} style={{ flex: 1 }}>
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleCheckout}
+                disabled={loading}
+                style={{ flex: 2, justifyContent: 'center', padding: '12px' }}
+              >
+                {loading ? (
+                  <><div className="spinner" /> Processing...</>
+                ) : (
+                  <>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    Place Order &mdash; ${subtotal.toFixed(2)}
+                  </>
+                )}
               </button>
             </div>
           </>

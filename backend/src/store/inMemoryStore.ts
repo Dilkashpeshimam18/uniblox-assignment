@@ -26,7 +26,7 @@ export class InMemoryStore {
         name: 'Wireless Headphones',
         price: 79.99,
         description: 'Premium noise-cancelling wireless headphones with 30hr battery.',
-        imageUrl: 'https://placehold.co/300x200?text=Headphones',
+        imageUrl: 'https://picsum.photos/seed/headphones/400/280',
         stock: 50,
       },
       {
@@ -34,7 +34,7 @@ export class InMemoryStore {
         name: 'Mechanical Keyboard',
         price: 129.99,
         description: 'TKL mechanical keyboard with RGB backlight and tactile switches.',
-        imageUrl: 'https://placehold.co/300x200?text=Keyboard',
+        imageUrl: 'https://picsum.photos/seed/keyboard/400/280',
         stock: 30,
       },
       {
@@ -42,7 +42,7 @@ export class InMemoryStore {
         name: 'USB-C Hub',
         price: 49.99,
         description: '7-in-1 USB-C hub with HDMI, SD card reader, and power delivery.',
-        imageUrl: 'https://placehold.co/300x200?text=USB+Hub',
+        imageUrl: 'https://picsum.photos/seed/usbhub/400/280',
         stock: 100,
       },
       {
@@ -50,7 +50,7 @@ export class InMemoryStore {
         name: 'Webcam HD',
         price: 89.99,
         description: '1080p HD webcam with built-in microphone and auto-focus.',
-        imageUrl: 'https://placehold.co/300x200?text=Webcam',
+        imageUrl: 'https://picsum.photos/seed/webcam/400/280',
         stock: 40,
       },
       {
@@ -58,7 +58,7 @@ export class InMemoryStore {
         name: 'Desk Lamp',
         price: 39.99,
         description: 'LED desk lamp with adjustable brightness and color temperature.',
-        imageUrl: 'https://placehold.co/300x200?text=Desk+Lamp',
+        imageUrl: 'https://picsum.photos/seed/desklamp/400/280',
         stock: 75,
       },
       {
@@ -66,7 +66,7 @@ export class InMemoryStore {
         name: 'Mouse Pad XL',
         price: 24.99,
         description: 'Extended mouse pad with stitched edges, 900x400mm.',
-        imageUrl: 'https://placehold.co/300x200?text=Mouse+Pad',
+        imageUrl: 'https://picsum.photos/seed/mousepad/400/280',
         stock: 200,
       },
     ];

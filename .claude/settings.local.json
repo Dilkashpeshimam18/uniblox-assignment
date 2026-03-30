@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(cmd /c \"taskkill /PID 712 /F\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3001\")",
+      "Bash(npx tsc:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i '1{/^import React from .react.;$/d}' \"$f\")",
+      "Bash(done)"
+    ]
+  }
+}
